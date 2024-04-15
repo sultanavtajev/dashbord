@@ -7,11 +7,11 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>{pageProps.title || "Default Dashboard Title"}</title>
+        <title>{pageProps.title || "Dashbord"}</title>
         <meta
           name="description"
           content={
-            pageProps.description || "Default description of the Dashboard"
+            pageProps.description || "Dashbord for å vise data og scripts"
           }
         />
       </Head>
