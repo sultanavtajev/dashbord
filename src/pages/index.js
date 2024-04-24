@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Header from "../components/header.js";
 import Stats from "../components/stats/stats.js";
-import Data from "../components/data.js";
+import Data from "../components/data/data.js";
 
 import {
   Activity,
