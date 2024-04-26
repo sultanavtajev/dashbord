@@ -70,13 +70,14 @@ export default function Header() {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <Link
-              href="#"
-              className="flex items-center gap-2 text-lg font-semibold"
+              href="/"
+              className="flex items-center gap-2 text-lg font-semibold md:text-base"
             >
-              <Package2 className="h-6 w-6" />
-              <span className="sr-only">Bachelor</span>
+              <img src="/logo.svg" alt="Logo" className="h-24 w-48" />{" "}
+              {/* Juster størrelsen etter behov */}
+              <span className="sr-only">Hjem</span>
             </Link>
-            <Link href="#" className="hover:text-foreground">
+            <Link href="/" className="hover:text-foreground">
               Dashboard
             </Link>
             <Link
