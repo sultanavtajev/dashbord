@@ -29,7 +29,6 @@ export default function Toppscripts() {
       const querySnapshot = await getDocs(q);
       const scriptsData = querySnapshot.docs.map((doc) => ({
         name: doc.id, // Navnet/id på scriptet
-        category: "Kategori her", // Legg til logikk for å bestemme kategorien hvis nødvendig
         count: doc.data().accesses, // Antall tilganger
       }));
       setScripts(scriptsData);
@@ -53,7 +52,7 @@ export default function Toppscripts() {
           <TableHeader>
             <TableRow>
               <TableHead>Script</TableHead>
-              <TableHead className="text-center">Kategori</TableHead>
+              <TableHead className="text-center"></TableHead>
               <TableHead className="text-right">Antall</TableHead>
             </TableRow>
           </TableHeader>
