@@ -1,22 +1,6 @@
-import React from "react";
-import Link from "next/link";
-
-import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Users,
-} from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
+import { storage } from "../../firebaseConfig";
+import { ref, listAll } from "firebase/storage";
 
 import {
   Card,
@@ -25,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import {
   Table,
   TableBody,
@@ -34,89 +17,98 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button"; // Sørg for at denne importen er korrekt
 
-export default function Data() {
+export default function Allescripts() {
+  const [directories, setDirectories] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [fileLists, setFileLists] = useState({});
+
+  useEffect(() => {
+    const fetchDirectories = async () => {
+      const rootRef = ref(storage, "");
+      try {
+        const response = await listAll(rootRef);
+        const dirs = response.prefixes.map(async (folderRef) => {
+          const folderFiles = await listAll(folderRef);
+          const files = folderFiles.items.map((fileRef) => fileRef.name);
+          return {
+            name: folderRef.name,
+            files: files,
+          };
+        });
+        const resolvedDirs = await Promise.all(dirs);
+        setDirectories(resolvedDirs);
+        const filesMap = {};
+        resolvedDirs.forEach((dir) => {
+          filesMap[dir.name] = dir.files;
+        });
+        setFileLists(filesMap);
+      } catch (error) {
+        console.error("Error fetching directories", error);
+      }
+    };
+
+    fetchDirectories();
+  }, []);
+
+  const toggleDropdown = (name) => {
+    if (openDropdown === name) {
+      setOpenDropdown(null);
+    } else {
+      setOpenDropdown(name);
+    }
+  };
+
   return (
     <div className="grid gap-4 md:gap-8 lg:grid-cols-1 xl:grid-cols-1">
-      <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
-        <CardHeader className="flex flex-row items-center">
-          <div className="grid gap-2">
-            <CardTitle>Alle scripts</CardTitle>
-            <CardDescription>
-              Scripts sortert etter kategori
-            </CardDescription>
-          </div>
+      <Card className="xl:col-span-2">
+        <CardHeader>
+          <CardTitle>Scripts</CardTitle>
+          <CardDescription>Alle scripts i databasen</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Script</TableHead>
-                <TableHead className="text-center">Kategori</TableHead>
-                <TableHead className="text-right">Sist endret</TableHead>
+                <TableHead>Mappe</TableHead>
+                <TableHead className="text-center">Antall filer</TableHead>
+                <TableHead className="text-right">Mer informasjon</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 1</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.1
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-24</TableCell>
-                <TableCell className="text-right">32</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 2</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.2
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-25</TableCell>
-                <TableCell className="text-right">4</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 3</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.3
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-26</TableCell>
-                <TableCell className="text-right">28</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 4</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.4
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-27</TableCell>
-                <TableCell className="text-right">27</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 5</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.5
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-28</TableCell>
-                <TableCell className="text-right">45</TableCell>
-              </TableRow>
+              {directories.map((dir, index) => (
+                <React.Fragment key={index}>
+                  <TableRow>
+                    <TableCell>{dir.name}</TableCell>
+                    <TableCell className="text-center">
+                      {dir.files.length}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => toggleDropdown(dir.name)}>
+                        {openDropdown === dir.name
+                          ? "Skjul filer"
+                          : "Vis filer"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  {openDropdown === dir.name && (
+                    <TableRow>
+                      <TableCell colSpan="3">
+                        <ul>
+                          {dir.files.map((file, idx) => (
+                            <li key={idx}>{file}</li>
+                          ))}
+                        </ul>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-      
     </div>
   );
 }

@@ -1,5 +1,6 @@
-import React from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { db } from "../../../firebaseConfig"; // Sørg for at denne stien er riktig
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 
 import {
   Card,
@@ -19,69 +20,56 @@ import {
 } from "@/components/ui/table";
 
 export default function Toppscripts() {
+  const [scripts, setScripts] = useState([]); // Tilstand for å lagre script-data
+
+  useEffect(() => {
+    const fetchScripts = async () => {
+      const scriptsRef = collection(db, "folderStats");
+      const q = query(scriptsRef, orderBy("accesses", "desc"), limit(5));
+      const querySnapshot = await getDocs(q);
+      const scriptsData = querySnapshot.docs.map((doc) => ({
+        name: doc.id, // Navnet/id på scriptet
+        category: "Kategori her", // Legg til logikk for å bestemme kategorien hvis nødvendig
+        count: doc.data().accesses, // Antall tilganger
+      }));
+      setScripts(scriptsData);
+    };
+
+    fetchScripts();
+  }, []);
+
   return (
-      <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
-        <CardHeader className="flex flex-row items-center">
-          <div className="grid gap-2">
-            <CardTitle>Toppliste scripts</CardTitle>
-            <CardDescription>
-              Scripts som er mest brukt de siste 7 dagene
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Script</TableHead>
-                <TableHead className="text-center">Kategori</TableHead>
-                <TableHead className="text-right">Antall</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              <TableRow>
+    <Card className="xl:col-span-2">
+      <CardHeader className="flex flex-row items-center">
+        <div className="grid gap-2">
+          <CardTitle>Toppliste scripts</CardTitle>
+          <CardDescription>
+            Scripts som er mest brukt de siste 7 dagene
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Script</TableHead>
+              <TableHead className="text-center">Kategori</TableHead>
+              <TableHead className="text-right">Antall</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {scripts.map((script) => (
+              <TableRow key={script.name}>
                 <TableCell>
-                  <div className="font-medium">Keylogger</div>
+                  <div className="font-medium">{script.name}</div>
                 </TableCell>
-                <TableCell className="text-center">Data</TableCell>
-                <TableCell className="text-right">27</TableCell>
+                <TableCell className="text-center">{script.category}</TableCell>
+                <TableCell className="text-right">{script.count}</TableCell>
               </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">SysInfo</div>
-                </TableCell>
-                <TableCell className="text-center">System</TableCell>
-                <TableCell className="text-right">18</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PassInfo</div>
-                </TableCell>
-                <TableCell className="text-center">Private</TableCell>
-                <TableCell className="text-right">15</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">ProgRun</div>
-                </TableCell>
-                <TableCell className="text-center">System</TableCell>
-                <TableCell className="text-right">13</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">LoginLog</div>
-                </TableCell>
-                <TableCell className="text-center">Private</TableCell>
-                <TableCell className="text-right">8</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }

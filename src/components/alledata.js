@@ -1,23 +1,6 @@
-import React from "react";
-import Link from "next/link";
-
-import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Users,
-} from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebaseConfig"; // Husk å justere denne stien til din faktiske konfigurasjonsfil
+import { collection, getDocs } from "firebase/firestore";
 import {
   Card,
   CardContent,
@@ -25,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import {
   Table,
   TableBody,
@@ -34,85 +16,83 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 export default function Data() {
+  const [machines, setMachines] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  useEffect(() => {
+    const fetchMachines = async () => {
+      const querySnapshot = await getDocs(collection(db, "machines"));
+      const machinesData = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.navn || "Ukjent",
+          dataCount: Object.keys(data).length - 0, // Juster for å ikke telle 'id' eller et annet unødvendig felt
+          fields: data
+        };
+      });
+      setMachines(machinesData);
+    };
+
+    fetchMachines();
+  }, []);
+
+  const toggleDropdown = (id) => {
+    if (openDropdown === id) {
+      setOpenDropdown(null);
+    } else {
+      setOpenDropdown(id);
+    }
+  };
+
   return (
     <div className="grid gap-4 md:gap-8 lg:grid-cols-1 xl:grid-cols-1">
-      <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
-        <CardHeader className="flex flex-row items-center">
-          <div className="grid gap-2">
-            <CardTitle>Alle data</CardTitle>
-            <CardDescription>
-              Alle data i databasen sortert etter klient
-            </CardDescription>
-          </div>
-        
+      <Card className="xl:col-span-2">
+        <CardHeader>
+          <CardTitle>Alle data</CardTitle>
+          <CardDescription>
+            Alle data i databasen sortert etter maskin
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Klient</TableHead>
-                <TableHead className="text-center">Dato</TableHead>
-                <TableHead className="text-right">Datapunkter</TableHead>
+                <TableHead>Maskin</TableHead>
+                <TableHead className="text-center">Antall datapunkter</TableHead>
+                <TableHead className="text-right">Mer informasjon</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 1</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.1
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-24</TableCell>
-                <TableCell className="text-right">32</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 2</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.2
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-25</TableCell>
-                <TableCell className="text-right">4</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 3</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.3
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-26</TableCell>
-                <TableCell className="text-right">28</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 4</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.4
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-27</TableCell>
-                <TableCell className="text-right">27</TableCell>
-              </TableRow>
-
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">PC 5</div>
-                  <div className="hidden text-sm text-muted-foreground md:inline">
-                    192.168.1.5
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">2023-06-28</TableCell>
-                <TableCell className="text-right">45</TableCell>
-              </TableRow>
+              {machines.map((machine) => (
+                <React.Fragment key={machine.id}>
+                  <TableRow>
+                    <TableCell>{machine.name}</TableCell>
+                    <TableCell className="text-center">{machine.dataCount}</TableCell>
+                    <TableCell className="text-right">
+                      <Button onClick={() => toggleDropdown(machine.id)}>
+                        {openDropdown === machine.id ? "Skjul data" : "Vis data"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  {openDropdown === machine.id && (
+                    <TableRow>
+                      <TableCell colSpan="3">
+                        <ul>
+                          {Object.entries(machine.fields)
+                            .filter(([key, _]) => key !== "id") // Filtrer ut 'navn' feltet fra dropdown
+                            .map(([key, value], idx) => (
+                              <li key={idx}>{`${key}: ${value}`}</li>
+                            ))}
+                        </ul>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))}
             </TableBody>
           </Table>
         </CardContent>

@@ -1,6 +1,8 @@
 import React from 'react'
 import Link from "next/link";
 
+
+
 import {
   Activity,
   ArrowUpRight,
@@ -34,9 +36,11 @@ export default function Header() {
           href="/"
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
-          <Package2 className="h-6 w-6" />
-          <span className="sr-only">Bachelor</span>
+          <img src="/logo.svg" alt="Logo" className="h-24 w-48" />{" "}
+          {/* Juster størrelsen etter behov */}
+          <span className="sr-only">Hjem</span>
         </Link>
+
         <Link
           href="/"
           className="text-muted-foreground transition-colors hover:text-foreground"
@@ -101,7 +105,7 @@ export default function Header() {
             /> */}
           </div>
         </form>
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
               <CircleUser className="h-5 w-5" />
@@ -116,7 +120,7 @@ export default function Header() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>Logg ut</DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
     </header>
   );
