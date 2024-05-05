@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebaseConfig"; // Husk å justere denne stien til din faktiske konfigurasjonsfil
 import { collection, getDocs } from "firebase/firestore";
+
 import {
   Card,
   CardContent,
