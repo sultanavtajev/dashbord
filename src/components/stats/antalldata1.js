@@ -1,7 +1,6 @@
-/* Ikke i bruk*/
-
 import React, { useState, useEffect } from "react";
-import { db } from "../../../firebaseConfig";
+import { functions, db } from "../../../firebaseConfig";
+import { httpsCallable } from "firebase/functions";
 import {
   doc,
   setDoc,
@@ -16,41 +15,61 @@ import { Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Antalldata() {
-  const [totalFieldsCount, setTotalFieldsCount] = useState(0); // Totalt antall felt mottatt fra alle maskiner
-  const [monthlyChange, setMonthlyChange] = useState(0); // Akkumulert endring de siste 30 dager
+  const [totalFieldsCount, setTotalFieldsCount] = useState(0); // Total number of fields received from all machines
+  const [monthlyChange, setMonthlyChange] = useState(0); // Accumulated change over the last 30 days
 
-  useEffect(() => {
-    // Henter og beregner totalt antall felt for hver maskin
-    const fetchFieldCounts = async () => {
-      try {
-        const machinesCollectionRef = collection(db, "machines");
-        const machineSnapshots = await getDocs(machinesCollectionRef);
-        let totalFields = 0;
+  // Fetches the machine data and processes it to count fields
+  const fetchMachines = async () => {
+    const deepFetch = httpsCallable(functions, "deepFetch"); // Ensure this function is correctly set up in Firebase Functions
+    try {
+      const response = await deepFetch();
+      let totalFields = 0;
+      if (response.data && response.data.machines) {
+        response.data.machines.forEach((machine) => {
+          if (!machine.subcollections) {
+            console.log("No subcollections for machine", machine.id);
+            return;
+          }
 
-        machineSnapshots.docs.forEach((machineDoc) => {
-          // Teller feltene i hvert dokument
-          const fieldCount = Object.keys(machineDoc.data()).length;
-          totalFields += fieldCount;
+          machine.subcollections.forEach((sub) => {
+            if (!sub.documents) {
+              console.log("No documents in subcollection", sub.name);
+              return;
+            }
+
+            sub.documents.forEach((doc) => {
+              totalFields += Object.keys(doc).length;
+            });
+          });
         });
 
-        // Lagrer den beregnede totalen i "dataCounts" samlingen
-        const today = new Date().toISOString().slice(0, 10);
+        setTotalFieldsCount(totalFields); // Update state with the total field count
+
+        // Store the total count in Firestore under 'dataCounts' collection
+        const today = new Date().toISOString().slice(0, 10); // Format date as 'YYYY-MM-DD'
         const fieldsCountDocRef = doc(db, "dataCounts", today);
         await setDoc(
           fieldsCountDocRef,
-          { count: totalFields, date: today },
+          {
+            count: totalFields,
+            date: today,
+          },
           { merge: true }
         );
-
-        setTotalFieldsCount(totalFields); // Oppdaterer staten med nytt totalt antall felt
-      } catch (error) {
-        console.error("Failed to fetch and store fields counts:", error);
+      } else {
+        console.log("No machines data received", response.data);
       }
-    };
+    } catch (error) {
+      console.error("Error calling deepFetch function:", error);
+    }
+  };
 
-    fetchFieldCounts();
+  // Effect to fetch machine data
+  useEffect(() => {
+    fetchMachines();
   }, []);
 
+  // Effect to calculate monthly changes in the number of fields
   useEffect(() => {
     // Beregner den månedlige endringen i antall felt
     const fetchMonthlyChange = async () => {
@@ -82,6 +101,7 @@ export default function Antalldata() {
 
     fetchMonthlyChange();
   }, []);
+
 
   return (
     <Card x-chunk="dashboard-01-chunk-2">

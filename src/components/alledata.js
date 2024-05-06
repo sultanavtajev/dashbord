@@ -1,3 +1,5 @@
+/* Ikke i bruk*/
+
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebaseConfig"; // Husk å justere denne stien til din faktiske konfigurasjonsfil
 import { collection, getDocs } from "firebase/firestore";
@@ -32,7 +34,7 @@ export default function Data() {
           id: doc.id,
           name: data.navn || "Ukjent",
           dataCount: Object.keys(data).length - 0, // Juster for å ikke telle 'id' eller et annet unødvendig felt
-          fields: data
+          fields: data,
         };
       });
       setMachines(machinesData);
@@ -63,7 +65,9 @@ export default function Data() {
             <TableHeader>
               <TableRow>
                 <TableHead>Maskin</TableHead>
-                <TableHead className="text-center">Antall datapunkter</TableHead>
+                <TableHead className="text-center">
+                  Antall datapunkter
+                </TableHead>
                 <TableHead className="text-right">Mer informasjon</TableHead>
               </TableRow>
             </TableHeader>
@@ -72,10 +76,14 @@ export default function Data() {
                 <React.Fragment key={machine.id}>
                   <TableRow>
                     <TableCell>{machine.name}</TableCell>
-                    <TableCell className="text-center">{machine.dataCount}</TableCell>
+                    <TableCell className="text-center">
+                      {machine.dataCount}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button onClick={() => toggleDropdown(machine.id)}>
-                        {openDropdown === machine.id ? "Skjul data" : "Vis data"}
+                        {openDropdown === machine.id
+                          ? "Skjul data"
+                          : "Vis data"}
                       </Button>
                     </TableCell>
                   </TableRow>
