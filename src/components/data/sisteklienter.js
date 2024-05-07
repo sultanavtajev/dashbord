@@ -1,3 +1,5 @@
+/* Ikke i bruk*/
+
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { db } from "../../../firebaseConfig";
@@ -19,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
