@@ -3,7 +3,6 @@ import Link from 'next/link'
 /* import Alledata from '../components/alledata.js' */
 import Alledata1 from '../components/alledata1.js'
 
-
 export default function Datapage() {
   return (
     <div className="flex min-h-screen w-full flex-col">
