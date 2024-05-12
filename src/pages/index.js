@@ -1,61 +1,81 @@
 import React from "react";
-import Link from "next/link";
-import Header from "../components/header.js";
-import Stats from "../components/stats/stats.js";
-import Data from "../components/data/data.js";
-
-import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Users,
-} from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
-
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-export default function Dashboard() {
+  const handleLogin = (e) => {
+    e.preventDefault(); // Prevent the form from submitting the traditional way
+
+    // Check if the credentials match
+    if (email === "test123@test.no" && password === "test123") {
+      router.push("/dashbord"); // Redirect to the dashboard page
+    } else {
+      alert("Feil e-postadresse eller passord");
+    }
+  };
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <Stats />
-        <Data />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {" "}
+      {/* Bakgrunnsfarge og full høyde skjerm med sentrering */}
+      <main className="flex flex-col items-center justify-center w-full">
+        {" "}
+        {/* Sentrering av innholdet innenfor main */}
+        <Card className="w-full max-w-sm">
+          {" "}
+          {/* Bredde kontroll for kort */}
+          <CardHeader>
+            <CardTitle className="text-2xl">Logg inn</CardTitle>
+            <CardDescription>
+              Skriv inn din e-postadresse og passord for å logge inn.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleLogin}>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">E-post</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Passord</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full">
+                Logg inn
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
       </main>
     </div>
   );

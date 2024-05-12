@@ -1,7 +1,7 @@
 // pages/_app.js
 import "../styles/globals.css";
 import Head from "next/head";
-import RootLayout from "../components/layout/layout.js"; // Oppdater stien etter behov, antar at den ligger i src/app
+import RootLayout from "../components/layout/layout.js"; // Oppdater stien etter behov
 
 function MyApp({ Component, pageProps }) {
   return (
